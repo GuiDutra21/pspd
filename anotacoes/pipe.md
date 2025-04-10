@@ -1,4 +1,4 @@
-# Passo a passo para a criação do Pipe
+# Passo a passo para a criação do Pipe unidirecional
 
 > OBS: Para realizar o pipe utilizei de um processo pai que recebe os dados e de um processo filho que manda os dados através do pipe
 
@@ -24,6 +24,8 @@
 Assim o sistema cria um canal de comunicação unidirecional (um pipe), e preenche fd (file descriptor) com dois descritores:  
 - fd[0] que lê dados do pipe  
 - fd[1] que escreve dados no pipe
+
+> OBS: O fd[0] sempre é de leitura e o fd[1] de escrita, não tem como inverter
 
 ##  3. Faça o fork
 
