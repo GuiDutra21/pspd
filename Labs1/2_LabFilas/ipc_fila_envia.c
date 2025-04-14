@@ -31,6 +31,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+    printf("Arquivo que envia: msqid-%d e key-%d\n",msqid, key);
+
     /* Enviando mensagens */
     printf( "Digite mensagens de até 10 caracteres (Ctrl+D para sair):\n" );
     buf.mtype = 1;

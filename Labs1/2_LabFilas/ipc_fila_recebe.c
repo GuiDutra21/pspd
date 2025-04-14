@@ -32,6 +32,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
     
+    printf("Arquivo que recebe: msqid-%d e key-%d\n",msqid, key);
+
     printf( "Recebendo mensagens...\n" );
     buf.mtype = 1;
     
