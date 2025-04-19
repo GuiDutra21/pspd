@@ -12,6 +12,7 @@ int main() {
 	int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
 
 	// shmat to attach to shared memory
+	// (void*)0 → o sistema escolhe o endereço onde a memória será mapeada
 	char* str = (char*)shmat(shmid, (void*)0, 0);
 
 	cout << "Write Data : ";
@@ -20,7 +21,7 @@ int main() {
 	cout << "Data written in memory: " << str << endl;
 
 	// detach from shared memory
-	shmdt(str);
+	// shmdt(str);
 
 	return 0;
 }

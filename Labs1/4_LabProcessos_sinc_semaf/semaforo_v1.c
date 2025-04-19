@@ -27,7 +27,7 @@ void ImprimeTexto (void) {
 		for (i = 0; i < number; i++ ) {
 			if( ! (tmp_index + i > sizeof(texto_base)) ) {
 				fprintf(stderr, "%c", texto_base[tmp_index + i]);
-				usleep(1);
+				usleep(10000);
 			} /* fim-if */
 		} /* fim-for */
 		*indice = tmp_index + i;
@@ -55,5 +55,5 @@ int main (void) {
 	ImprimeTexto();
 	
 	/* libera memoria compartilhada e semaforo */
-	//shmctl (g_shm_id, IPC_RMID, NULL);
+	shmctl (g_shm_id, IPC_RMID, NULL);
 } /* fim-main */
