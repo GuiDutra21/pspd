@@ -22,7 +22,7 @@ struct sembuf	g_lock_sembuf[1];
 struct sembuf	g_unlock_sembuf[1];
 char texto_base[] = "abcdefghijklmnopqrstuvwxyz 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-void Imprime_texto(void) {
+void Imprime_texto(int count) {
 	struct timeval tv;
 	int number, tmp_index, i;
 
@@ -34,11 +34,12 @@ void Imprime_texto(void) {
 		number = ((tv.tv_usec / 47) % 3) + 1;
 	/* protegendo a memoria compartilhada: entrando na regiao critica */	
 		semop( g_sem_id, g_lock_sembuf, 1 );
+		// printf("\nFilho: %i trava semaforo\n",count);
 		tmp_index = *indice;
 		for( i = 0; i < number; i++ ) {
 			if( ! (tmp_index + i > sizeof(texto_base)) ) {
 				fprintf(stderr, "%c", texto_base[tmp_index + i]);
-					usleep(1);
+				usleep(1);
 			} /* fim-if */
 		} /* fim-for */
 		*indice = tmp_index + i;
@@ -47,6 +48,7 @@ void Imprime_texto(void) {
 			*indice = 0;
 		} /* fim-if */
 		/*  Liberando o semaforo ... */
+		// printf("\nFilho: %i destrava semaforo\n",count);
 		semop (g_sem_id, g_unlock_sembuf, 1);
 	} /* fim-while */
 } /* fim-Imprime_texto */
@@ -78,12 +80,14 @@ int main() {
   if( rtn == 0 ) {
 	  /* Estou no processo filho... */
 	  printf("Filho %i comecou ...\n", count);
-	  Imprime_texto();
+	  Imprime_texto(count);
   } else {
 	  /* Estou no processo pai ... */
-	  sleep(15);
+	  sleep(5);
 	  /* Matando os processos filhos  */
-	  kill(pid[0], SIGTERM); kill(pid[1], SIGTERM); kill(pid[2], SIGTERM);
+	  kill(pid[0], SIGTERM);
+	  kill(pid[1], SIGTERM);
+	  kill(pid[2], SIGTERM);
 	  /* Removendo a memoria compartilhada e o semaforo */
 	  shmctl(g_shm_id, IPC_RMID, NULL);
 	  semctl(g_sem_id, 0, IPC_RMID, 0);

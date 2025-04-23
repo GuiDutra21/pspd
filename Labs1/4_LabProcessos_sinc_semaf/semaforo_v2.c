@@ -16,7 +16,7 @@ int		*indice;
 
 char texto_base[] = "abcdefghijklmnopqrstuvwxyz 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-void ImprimeTexto(void) {
+void ImprimeTexto(int count) {
 	struct timeval tv;
 	int number, tmp_index, i;
 	
@@ -29,6 +29,7 @@ void ImprimeTexto(void) {
 		tmp_index = *indice;
 		for (i = 0; i < number; i++ ) {
 			if( ! (tmp_index + i > sizeof(texto_base)) ) {
+				printf("\nFilho: %i\n",count);
 				fprintf(stderr, "%c", texto_base[tmp_index + i]);
 				usleep(1);
 			} /*fim-if */
@@ -69,12 +70,14 @@ int main() {
   if (rtn == 0) { 
 	  /* Estou no processo filho... */
 	  printf("Filho %i comecou ...\n", count);
-	  ImprimeTexto();
+	  ImprimeTexto(count);
   } else {
 	/* Estou no processo pai ... */
-	  sleep(15);
+	  sleep(3);
 	  /* Matando os processos filhos  */
-	  kill(pid[0], SIGTERM); kill(pid[1], SIGTERM); kill(pid[2], SIGTERM);
+	  kill(pid[0], SIGTERM);
+	  kill(pid[1], SIGTERM);
+	  kill(pid[2], SIGTERM);
 	  /* Removendo a memoria compartilhada */
 	  shmctl (g_shm_id, IPC_RMID, NULL);
   } /* fim-else */
