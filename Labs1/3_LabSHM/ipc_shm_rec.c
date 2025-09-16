@@ -28,16 +28,28 @@
 #include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <stdlib.h>
 
-int main() {
+int main()
+{
     // ftok para gerar uma chave única
-    key_t key = ftok("shmfile", 65);
+    key_t key = ftok("ipc_shm_env.c", 65);
+    if (key == -1)
+    {
+        fprintf(stderr, "Erro na geracao do ID da fila.\n");
+        exit(1);
+    }
 
     // shmget retorna um identificador na variável shmid
     int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
+    if (shmid == -1)
+    {
+        fprintf(stderr, "Erro ao conectar a fila.\n");
+        exit(1);
+    }
 
     // shmat para anexar a memória compartilhada
-    char* str = (char*) shmat(shmid, (void*)0, 0);
+    char *str = (char *)shmat(shmid, (void *)0, 0);
 
     printf("Dados lidos da memória: %s\n", str);
 

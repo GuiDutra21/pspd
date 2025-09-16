@@ -15,40 +15,23 @@ int main(int argc, char **argv) {
 
     /* ID mantido pelo kernel */
     int msqid;
-
     /* Identificador unico da fila de mensagens */
     key_t key;
-    
     /* Gerando o identificador unico da fila... */
     if( ( key = ftok( "ipc_fila_envia.c", 'B' ) ) == -1 ) {
         fprintf( stderr, "Erro na geracao do ID da fila.\n" );
-        exit(1);
+       exit(1);
     }
-    /*  Sobre o pathname da funcao ftok: 
-        - Deve ser um arquivo que já exista no sistema.
-        - Não precisa ser o mesmo arquivo do programa, mas deve ser o mesmo para quem quer acessar a mesma fila.
-        - Ex.: se outro programa usar ftok("ipc_fila_envia.c", 'B') → ele vai gerar a mesma chave e conseguir acessar a mesma fila de mensagens.
-        
-        Sobre o caracter da fucnao ftok:
-        - Um caractere (char) qualquer usado para gerar uma chave diferente a partir do mesmo arquivo.
-        - O ftok combina inode do arquivo + proj_id para gerar uma chave key_t única no sistema.
-    */
-
     /* Criando a fila de mensagens */
-    // IPC_CREAT -> Indica que se a fila de mensagens (ou outro recurso IPC) não existir, o sistema deve criá-la.
     if( ( msqid = msgget( key, 0666 | IPC_CREAT ) ) == -1 ) {
         fprintf( stderr, "Erro na criacao da fila.\n" );
         exit(1);
     }
-
-    printf("Arquivo que envia: msqid-%d e key-%d\n",msqid, key);
-
     /* Enviando mensagens */
     printf( "Digite mensagens de até 10 caracteres (Ctrl+D para sair):\n" );
     buf.mtype = 1;
     while( fgets( buf.mtext, 10, stdin ) /*&& !feof(stdin)*/ )  {
-        // OBS: Faz um cast da struct my_msgbuf para a struct msgbuf
-        if( msgsnd( msqid, (struct msgbuf *) &buf, sizeof(buf.mtext), 0 ) == -1 )
+    if( msgsnd( msqid, (struct msgbuf *) &buf, sizeof(buf), 0 ) == -1 )
         fprintf( stderr, "Erro no envio da mensagem.\n" );
     }
 //    if( msgctl( msqid, IPC_RMID, NULL ) == -1 ) {

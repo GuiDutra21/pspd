@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <sys/select.h>
 #define STDIN 0
 
 fd_set 			master, read_fds, write_fds;
