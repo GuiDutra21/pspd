@@ -1,0 +1,104 @@
+/***********************************/
+/* FGA/EngSofware/FRC  udpClient.c */
+/* Prof. Fernando W Cruz           */
+/***********************************/
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h> /* memset() */
+#include <stdlib.h>
+
+#define MAX_MSG 10
+
+int main(int argc, char *argv[])
+{
+    int sd, rc, i,n;
+    char msg[MAX_MSG];
+    struct sockaddr_in ladoCli;  /* dados do cliente local   */
+    struct sockaddr_in ladoServ; /* dados do servidor remoto */
+
+    /* confere o numero de argumentos passados para o programa */
+    if (argc < 3)
+    {
+        printf("uso correto: %s <ip_do_servidor> <porta_do_servidor> \n", argv[0]);
+        exit(1);
+    }
+
+    /* Preenchendo as informacoes de identificacao do remoto */
+    ladoServ.sin_family = AF_INET;
+    ladoServ.sin_addr.s_addr = inet_addr(argv[1]);
+    ladoServ.sin_port = htons(atoi(argv[2]));
+
+    /* Preenchendo as informacoes de identificacao do cliente */
+    ladoCli.sin_family = AF_INET;
+    ladoCli.sin_addr.s_addr = htonl(INADDR_ANY);
+    ladoCli.sin_port = htons(0); /* usa porta livre entre (1024-5000)*/
+
+    /*
+      Criando um socket. Nesse momento a variavel
+      sd contem apenas dados sobre familia e protocolo
+      SOCK_DGRAM → datagramas (UDP).
+      Se fosse SOCK_STREAM, seria TCP.
+      SD = Socket Descriptor
+    */
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sd < 0)
+    {
+        printf("%s: n�o pode abrir o socket \n", argv[0]);
+        exit(1);
+    }
+
+    /*
+      Relacionando o socket sd com a estrutura ladoCli
+      Depois do bind, sd faz referencia a protocolo local, ip local e porta local
+      Isso liga o socket ao IP e à porta do cliente.
+      Agora esse sd representa o "endereço de rede" do cliente.
+    */
+    rc = bind(sd, (struct sockaddr *)&ladoCli, sizeof(ladoCli));
+    if (rc < 0)
+    {
+        printf("%s: nao pode fazer um bind da porta\n", argv[0]);
+        exit(1);
+    }
+    printf("{UDP, IP_Cli: %s, Porta_Cli: %u, IP_R: %s, Porta_R: %s}\n", inet_ntoa(ladoCli.sin_addr), ntohs(ladoCli.sin_port), argv[1], argv[2]);
+
+    /* Enviando um pacote para cada parametro informado */
+    while (1)
+    {
+        /* limpa o buffer */
+        memset(msg, 0x0, MAX_MSG);
+        printf("Digite uma mensagem de ate %d caracteres: ", MAX_MSG);
+        fgets(msg, MAX_MSG, stdin);
+
+        rc = sendto(sd, msg, strlen(msg), 0, (struct sockaddr *)&ladoServ, sizeof(ladoServ));
+        if (rc < 0)
+        {
+            printf("%s: nao pode enviar dados %d \n", argv[0], i - 1);
+            close(sd);
+            exit(1);
+        }
+        printf("Enviando mensagem: %s\n", msg);
+
+        /* limpa o buffer */
+        memset(msg, 0x0, MAX_MSG);
+
+        /* recebe a mensagem  */
+        int tam_Server = sizeof(ladoServ);
+        n = recvfrom(sd, msg, MAX_MSG, 0, (struct sockaddr *)&ladoServ, &tam_Server);
+        if (n < 0)
+        {
+            printf("%s: nao pode receber dados \n", argv[0]);
+            continue;
+        }
+
+        /* imprime a mensagem recebida na tela do usuario */
+        printf("{UDP, IP_L: %s, Porta_L: %u", inet_ntoa(ladoServ.sin_addr), ntohs(ladoServ.sin_port));
+        printf(" IP_R: %s, Porta_R: %u} => %s\n", inet_ntoa(ladoServ.sin_addr), ntohs(ladoServ.sin_port), msg);
+    }
+    /* fim do while (laco) */
+    return 1;
+} /* fim do programa */

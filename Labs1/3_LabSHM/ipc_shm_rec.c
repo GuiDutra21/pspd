@@ -51,7 +51,12 @@ int main()
     // shmat para anexar a memória compartilhada
     char *str = (char *)shmat(shmid, (void *)0, 0);
 
-    printf("Dados lidos da memória: %s\n", str);
+    while (1)
+    {
+        printf("Dados lidos da memória: %s\n", str);
+        sleep(1);
+    }
+    
 
     // Desanexa a memória compartilhada
     shmdt(str);

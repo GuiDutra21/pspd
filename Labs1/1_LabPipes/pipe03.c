@@ -17,7 +17,7 @@ int main()
         close(fd[0]);
         printf("Escreva uma emnsagem de ate 10 caracteres: ");
         char buffer[5];
-        fgets(buffer,5,stdin);
+        fgets(buffer, 5, stdin);
         write(fd[1],buffer,sizeof(buffer));
         exit(0);
     }

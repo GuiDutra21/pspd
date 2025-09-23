@@ -85,4 +85,3 @@ int main(int argc, char *argv[])
     atende_cliente(novo_sd, endCli);
   } /* fim for */
 } /* fim do programa */
-
