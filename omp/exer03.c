@@ -1,33 +1,39 @@
 #include <stdio.h>
 #include <omp.h>
-#define MAX 1000000
-
-//  Cada thread le um numero no arquivo arqteste
+#define MAX 8
 
 int main()
 {
-    int lido;
-    int n = 3;
-    int soma = 0;
-    #pragma omp parallel private(lido) reduction(+:soma)
+    int thid,nthreads;
+    int A[MAX], B[MAX], C[MAX];
+    for (int i = 0; i < MAX; i++)
     {
+        A[i] = 1;
+        B[i] = 2;
+
+    }
+    
+    #pragma omp parallel private(thid)
+    {
+        thid = omp_get_thread_num();
         
-        FILE *fd; // Tem que ser local
-        fd = fopen("arqnums.txt", "r");
-        int thid = omp_get_thread_num();
-        int nthreads = omp_get_num_threads();
+        #pragma single
+        nthreads = omp_get_num_threads();
+
         int chunk = MAX/nthreads;
-        int largura = 9;
-        int offset = thid * largura * chunk;
-        fseek(fd, offset, SEEK_SET);
-        for(int i = 0; i < chunk; i++)
+        int ini = thid * chunk;
+        int fim = ini + chunk;
+
+        if(thid == nthreads - 1)
+            fim = MAX;
+        
+        #pragma omp for
+        for(int i = 0; i < MAX; i++)
         {
-            fscanf(fd, "%d", &lido);
-            if(lido == n)
-                soma++;
+            C[i] = A[i] + B[i];
+            printf("%d/%d --> %d\n",thid, nthreads, C[i]);
         }
     }
-    printf("%d ocorreu %d no arquivo\n",n,soma);
 
     return 0;
 }

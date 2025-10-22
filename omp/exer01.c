@@ -1,24 +1,48 @@
 #include <stdio.h>
 #include <omp.h>
-#define MAX 8
-
-//  Cada thread le um numero no arquivo arqteste
 
 int main()
 {
-    int lido;
-    FILE *fd;
+    int thid, nthreads;
 
-    #pragma omp parallel private(lido)
+    omp_set_num_threads(5);
+
+// Apenas a thread mais rapida executa o omp_get_num_threads()
+// e como ela eh private apenas ela recebe o valor correto do numero de threads
+#pragma omp parallel private(thid, nthreads) num_threads(3)
     {
-        
-        fd = fopen("arqteste.txt", "r");
-        int thid = omp_get_thread_num();
-        int largura = 9;
-        int offset = thid * largura;
-        fseek(fd, offset, SEEK_SET);
-        fscanf(fd, "%d", &lido);
-        printf("%d --> Valor lido %d\n",thid, lido);
+        thid = omp_get_thread_num();
+#pragma omp single
+        nthreads = omp_get_num_threads();
+        printf("%d/%d --> Regiao paralela\n", thid, nthreads);
     }
+
+    printf("%d/%d Estou na area sequencial\n", thid, nthreads);
+
+#pragma omp parallel private(thid) shared(nthreads) num_threads(5)
+    {
+        thid = omp_get_thread_num();
+        nthreads = omp_get_num_threads();
+#pragma omp single
+        printf("%d/%d --> Outra regiao paralela\n", thid, nthreads);
+    }
+
+    printf("%d/%d Estou na area sequencial novamemte\n", thid, nthreads);
     return 0;
 }
+
+// #include <stdio.h>
+// #include <omp.h>
+// int main()
+// {
+//     int myid, nthreads;
+//     omp_set_num_threads(5);
+//     nthreads = omp_get_num_threads(); // Se executada fora do pragma so vai retornar 1
+//     printf("teste %d\n",nthreads);
+//     #pragma omp parallel private(myid) shared(nthreads)
+//     {
+//         myid = omp_get_thread_num();
+//         printf("%d of %d – hello world!\n", myid, nthreads);
+//     }
+//     return 0;
+// }

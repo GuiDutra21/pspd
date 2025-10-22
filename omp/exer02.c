@@ -2,29 +2,37 @@
 #include <omp.h>
 #define MAX 8
 
-//  Cada thread le um numero no arquivo arqteste
-
 int main()
 {
-    int lido;
-    FILE *fd;
-
-    #pragma omp parallel private(lido)
+    int thid,nthreads;
+    int A[MAX], B[MAX], C[MAX];
+    for (int i = 0; i < MAX; i++)
     {
-        
-        fd = fopen("arqteste.txt", "r");
-        int thid = omp_get_thread_num();
-        int nthreads = omp_get_num_threads();
-        int chunk = MAX/nthreads;
-        int largura = 9;
-        int offset = thid * largura *  chunk;
-        fseek(fd, offset, SEEK_SET);
-        for(int i = 0; i<chunk; i++)
-        {
-            fscanf(fd, "%d", &lido);
-            printf("%d/%d --> Valor lido %d\n",thid,nthreads, lido);
-        }
-        fclose(fd);
+        A[i] = 1;
+        B[i] = 2;
+
     }
+    
+    #pragma omp parallel private(thid)
+    {
+        thid = omp_get_thread_num();
+        
+        #pragma single
+        nthreads = omp_get_num_threads();
+
+        int chunk = MAX/nthreads;
+        int ini = thid * chunk;
+        int fim = ini + chunk;
+
+        if(thid == nthreads - 1)
+            fim = MAX;
+        
+        for(int i = ini; i < fim; i++)
+        {
+            C[i] = A[i] + B[i];
+            printf("%d/%d --> %d\n",thid, nthreads, C[i]);
+        }
+    }
+
     return 0;
 }
