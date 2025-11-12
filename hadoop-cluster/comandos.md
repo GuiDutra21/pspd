@@ -105,6 +105,8 @@ Obs: Rode cada comando em um terminal diferente.
 apt-get update
 apt install openjdk-21-jdk openssh-server
 ```
+
+OBS: Provavelmente será solicitado para confirmar a instalação, digite `y` e pressione Enter, além disso pode perguntar a sua região e cidade, selecione conforme sua localidade.
 - Agora precisamos localizar o JAVA_HOME. Execute, em apenas 1 terminal, o seguinte comando abaixo para encontrar o caminho do Java instalado:
 
 ```bash
@@ -158,14 +160,14 @@ service ssh start
 ```
 - Agora, em cada terminal, execute o seguinte comando e pressione Enter para todas as opções:
 
-OBS: Após rodar o comando a primeira opção que irá aparecer é o local para salvar a chave, copiei o caminho que é mostrado entre parenteses, Ex: `/root/.ssh/id_rsa`
-
 ```bash
 ssh-keygen -t rsa
 ```
-- Em seguida, execute o comando abaixo, em cada terminal, para adicionar a chave pública ao arquivo `authorized_keys`:
 
-OBS: No caminho copiado anteriormente, acrescente `.pub` no final.
+OBS: Após rodar o comando a primeira opção que irá aparecer é o local para salvar a chave, copiei o caminho que é mostrado entre parenteses, Ex: `/root/.ssh/id_rsa`
+
+- Em seguida, execute o comando abaixo, em cada terminal, para adicionar a chave pública ao arquivo `authorized_keys` colocando o caminho copiado anteriormente adicionando `.pub` no final:
+
 ```bash
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ```
@@ -191,15 +193,7 @@ ssh localhost
 
 ### Configurando o SSH sem senha entre o master e os slaves
 
-
-- No terminal do hadoop-master, execute os seguintes comandos para copiar a chave pública para os slaves:
-
-```bash
-ssh-copy-id -i /root/.ssh/id_rsa.pub root@hadoop-slave1
-ssh-copy-id -i /root/.ssh/id_rsa.pub root@hadoop-slave2
-```
-
-- No hadoop-master, rode o seguinte comando para exibir a chave pública gerada anteriormente e **copie** o conteúdo exibido:
+- No hadoop-master, rode o seguinte comando para exibir a chave pública gerada anteriormente e **copie** o conteúdo exibido referente ao master:
 ```bash
 cat ~/.ssh/id_rsa.pub
 ```
@@ -214,24 +208,73 @@ chmod 600 ~/.ssh/authorized_keys
 ```
 
 - Agora teste a conexão SSH sem senha do master para os slaves:
+
+```bash
+ssh hadoop-slave1
+ssh hadoop-slave2
+```
+
 - OBS: Substitua `hadoop-slave1` e `hadoop-slave2` pelos endereços IP ou nomes corretos dos slaves, se necessário.
 
+<!-- - No terminal do hadoop-master, execute os seguintes comandos para copiar a chave pública para os slaves:
 
-- Agora faça o mesmo processo para os slaves se conectarem ao master e entre si.
+```bash
+ssh-copy-id -i /root/.ssh/id_rsa.pub root@hadoop-slave1
+ssh-copy-id -i /root/.ssh/id_rsa.pub root@hadoop-slave2
+``` -->
 
-- No hadoop-slave1, rode o seguinte comando para exibir a chave pública gerada anteriormente e **copie** o conteúdo exibido:
+- Agora faça o mesmo processo para os slaves se conectarem ao master e entre si:
 
+### Configurando o SSH sem senha entre os slaves e o master
 
+- No hadoop-slave1, rode o seguinte comando para exibir a chave pública gerada anteriormente e **copie** o conteúdo exibido referente ao slave1:
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+
+- No terminal do master e do slave2, adicione a chave copiada manualmente:
+
+```bash
+mkdir -p ~/.ssh # Pode omitir essa linha no slave1 se ja tiver sido criado
+echo "COLE_A_CHAVE_PUBLICA_DO_MASTER_AQUI" >> ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+```
+
+- Agora teste a conexão SSH sem senha do slave1 para o slave2 e para o master:
+
+```bash
+ssh hadoop-slave2
+ssh hadoop-master
+```
+
+- Repita o mesmo processo para o hadoop-slave2:
+
+- No hadoop-slave2, rode o seguinte comando para exibir a chave pública gerada anteriormente e **copie** o conteúdo exibido referente ao slave2:
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+- No terminal do master e do slave1, adicione a chave copiada manualmente:
+
+```bash
+mkdir -p ~/.ssh # Pode omitir essa linha se ja tiver sido criado
+echo "COLE_A_CHAVE_PUBLICA_DO_MASTER_AQUI" >> ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+```
+
+- Agora teste a conexão SSH sem senha do slave2 para o slave1 e para o master: 
+
+```bash
+ssh hadoop-slave1
+ssh hadoop-master
+```
 
 ### Baixando e configurando o Hadoop
 
-----
-- Depois de entrar no localhost, entre na pasta opt em cada terminal:
-
-```bash
-cd ..
-cd opt
-```
+- Entre na pasta opt `cd opt` em cada terminal
 
 - Agora, em cada terminal, execute os seguintes comandos para baixar e extrair o Hadoop:
 
@@ -239,14 +282,34 @@ cd opt
 wget https://dlcdn.apache.org/hadoop/common/hadoop-3.4.2/hadoop-3.4.2.tar.gz
 tar -xvzf hadoop-3.4.2.tar.gz
 ```
-- Agora, em cada terminal, execute o comando abaixo para atribuir a porta e o hostname de cada nó:
+
+- Se quiser pode remover o arquivo tar.gz para economizar espaço:
 
 ```bash
-nano etc/hadoop/core-site.xml
-<configuration>
-      <property><name>fs.default.name</name><value>hdfs://0.0.0.0:9000</value></property>
-</configuration>
+rm hadoop-3.4.2.tar.gz
+```
 
+- Agora, em cada terminal, entre na pasta hadoop-3.4.2 e abra o arquivo etc/hadoop/core-site.xml e e atribua a porta e o hostname do nó master igual ao exemplo abaixo:
+
+```bash
+cd hadoop-3.4.2
+
+nano etc/hadoop/core-site.xml
+
+<configuration>
+        <property><name>fs.default.name</name><value>hdfs://hadoop-master:9000</value></property>
+</configuration>
+```
+
+- OBS: Nos comandos continue na pasta etc/hadoop-3.4.2
+
+- Agora apenas no master abra o arquivo etc/hadoop/workers e adicione os nomes dos slaves:
+
+```bash
+nano etc/hadoop/workers
+
+hadoop-slave1
+hadoop-slave2
 ```
 
 - Agora, abra o arquivo hadoop-env.sh em cada terminal:
@@ -255,7 +318,7 @@ nano etc/hadoop/core-site.xml
 nano etc/hadoop/hadoop-env.sh
 ```
 
-- Encontre a linha que contém:
+- Encontre a parte que contém:
 
 ```bash 
 # The java implementation to use. By default, this environment
@@ -270,7 +333,6 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 ```
 - No final desse mesmo arquivo, tambem adicione as seguintes linhas em cada terminal:
 
-? Retirar o que esta embaixo ?
 ```bash
 export HDFS_NAMENODE_USER="root"
 export HDFS_DATANODE_USER="root"
@@ -278,59 +340,6 @@ export HDFS_SECONDARYNAMENODE_USER="root"
 export YARN_RESOURCEMANAGER_USER="root"
 export YARN_NODEMANAGER_USER="root"
 ```
-
-- Agora, em cada termina, execute o comando abaixo para formartar o NameNode:
-
-```bash
-bin/hadoop namenode -format
-```
-
-- Agora, em cada terminal, execute os seguintes comandos para instalar o sudo:
-
-```bash
-apt update
-apt install -y sudo
-echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-```
-- Para iniciar o HDFS, execute o comando abaixo:
-
-```bash
-sbin/start-dfs.sh
-```
-
-jps
-
-http://172.20.0.11:9870/dfshealth.html#tab-overview
-
-
-bin/hadoop dfs -mkdir /user
-
-bin/hadoop dfs -mkdir /user/root
-
-nano ~/.bashrc
-
-export HADOOP_HOME=/opt/hadoop-3.4.2
-
-export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
-
-source ~/.bashrc
-
-----
-
-# Multi-node
-
-ssh-keygen -t rsa (opcional)
-
-
-
-entre em cada terminal no opt/hadoop-3.4.2 e abra o arquivo `etc/hadoop/core-site.xml`, nele no lugar do 0.0.0.0:9000 coloque o nome hadoop-master:9000
-<configuration>
-        <property><name>fs.default.name</name><value>hdfs://hadoop-master:9000</value></property>
-</configuration>
-
-agora apenas no master abra o arquivo etc/hadoop/workers e adicione os nomes dos slaves:
-hadoop-slave1
-hadoop-slave2
 
 - Agora, em cada terminal, abra o arquivo `etc/hadoop/hdfs-site.xml` e adicione o seguinte conteúdo:
 <configuration>
@@ -347,6 +356,74 @@ hadoop-slave2
         <value>file:/opt/hadoop-3.4.2/hdfs/datanode</value>
     </property>
 
-
 </configuration>
 
+- Agora, em cada terminal, abra o arquivo `~/.bashrc` para adicionar a variável de ambiente HADOOP_HOME e atualizar o PATH, coloque no final do arquivo:
+
+```bash
+nano ~/.bashrc
+
+export HADOOP_HOME=/opt/hadoop-3.4.2
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+
+source ~/.bashrc
+```
+
+- Agora, em cada terminal, execute os seguintes comandos para instalar o sudo:
+
+```bash
+apt update
+apt install -y sudo
+echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+```
+
+- Agora, em cada termina, execute o comando abaixo para formartar o NameNode:
+
+```bash
+hdfs namenode -format
+```
+
+### Iniciando o HDFS e criando diretórios
+
+- Para iniciar o HDFS, execute o comando abaixo no master:
+
+```bash
+sbin/start-all.sh
+```
+
+- Para verificar se os processos estão rodando, execute o comando abaixo em cada terminal:
+
+```bash
+jps
+```
+
+- No masster, você deve ver os processos NameNode, DataNode, SecondaryNameNode, ResourceManager e NodeManager.
+- Nos slaves, você deve ver os processos DataNode e NodeManager.
+
+- Agora, abra o navegador e acesse o seguinte endereço para verificar o status do HDFS:
+
+http://172.20.0.11:9870/dfshealth.html#tab-overview
+
+- Agora, no terminal do master, execute os seguintes comandos para criar os diretórios necessários no HDFS:
+
+```bash
+hdfs dfs -mkdir /user
+hdfs dfs -mkdir /user/root
+```
+
+- Pronto! Seu cluster Hadoop está configurado e funcionando com Docker Compose.
+
+### Parando o cluster Hadoop
+
+- Para parar o cluster Hadoop, execute o seguinte comando no terminal do master dentro da pasta hadoop-3.4.2:
+
+```bash
+sbin/stop-all.sh
+``` 
+
+### Parando os containers Docker
+- Para parar os containers Docker, execute o seguinte comando na pasta onde está o arquivo `docker-compose.yml`:
+
+```bash
+docker-compose stop
+```
