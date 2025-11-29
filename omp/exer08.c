@@ -2,13 +2,15 @@
 #include <omp.h>
 #define MAX 1000000
 
-//  Cada thread le um numero no arquivo arqteste
+//  Cada thread le um numero no arquivo arqteste e mostra quantos 3 existem no arquivo
 
 int main()
 {
     int lido;
     int n = 3;
     int soma = 0;
+
+    // O reduction ja controla a concorrencia na variavel, igual o atomic faz 
     #pragma omp parallel private(lido) reduction(+:soma)
     {
         

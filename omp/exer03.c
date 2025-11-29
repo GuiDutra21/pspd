@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <omp.h>
-#define MAX 8
+#define MAX 9
 
 int main()
 {
@@ -20,12 +20,12 @@ int main()
         #pragma single
         nthreads = omp_get_num_threads();
 
-        int chunk = MAX/nthreads;
-        int ini = thid * chunk;
-        int fim = ini + chunk;
+        // int chunk = MAX/nthreads;
+        // int ini = thid * chunk;
+        // int fim = ini + chunk;
 
-        if(thid == nthreads - 1)
-            fim = MAX;
+        // if(thid == nthreads - 1)
+        //     fim = MAX;
         
         #pragma omp for
         for(int i = 0; i < MAX; i++)

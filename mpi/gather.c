@@ -10,7 +10,7 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int vet[4];          // vetor original (usado só no root)
+    int vet[4];          // vetor original (preenchido só no root)
     int resultado[4];    // vetor para coletar resultados (usado só no root)
     int dadoRecebido;
 

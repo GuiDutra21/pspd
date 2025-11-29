@@ -26,7 +26,7 @@ int main()
         {
             C[i] = A[i] + B[i];
             
-            #pragma omp atomic
+            #pragma omp atomic // ou #pragma omp critical
             soma += C[i];
         }
     }

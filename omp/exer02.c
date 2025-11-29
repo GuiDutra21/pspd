@@ -8,8 +8,8 @@ int main()
     int A[MAX], B[MAX], C[MAX];
     for (int i = 0; i < MAX; i++)
     {
-        A[i] = 1;
-        B[i] = 2;
+        A[i] = i;
+        B[i] = i+1;
 
     }
     
@@ -30,7 +30,7 @@ int main()
         for(int i = ini; i < fim; i++)
         {
             C[i] = A[i] + B[i];
-            printf("%d/%d --> %d\n",thid, nthreads, C[i]);
+            printf("%d/%d --> %d + %d = %d\n",thid, nthreads, A[i], B[i], C[i]);
         }
     }
 

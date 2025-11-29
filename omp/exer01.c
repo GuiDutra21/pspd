@@ -12,8 +12,8 @@ int main()
 #pragma omp parallel private(thid, nthreads) num_threads(3)
     {
         thid = omp_get_thread_num();
-#pragma omp single
-        nthreads = omp_get_num_threads();
+        #pragma omp single
+            nthreads = omp_get_num_threads();
         printf("%d/%d --> Regiao paralela\n", thid, nthreads);
     }
 

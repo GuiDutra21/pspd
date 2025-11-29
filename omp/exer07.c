@@ -2,7 +2,7 @@
 #include <omp.h>
 #define MAX 8
 
-//  Cada thread le um numero no arquivo arqteste
+// Cada thread le chunk numeros do arquivo arqteste
 int main()
 {
     int lido;
