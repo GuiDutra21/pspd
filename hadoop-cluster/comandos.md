@@ -335,6 +335,7 @@ export YARN_NODEMANAGER_USER="root"
 ```
 
 - Agora, em cada terminal, abra o arquivo `etc/hadoop/hdfs-site.xml` e adicione o seguinte conteúdo:
+```bash
 <configuration>
 
     <!-- Define o diretorio onde o NameNode armazena seus metadados -->
@@ -350,6 +351,7 @@ export YARN_NODEMANAGER_USER="root"
     </property>
 
 </configuration>
+```
 
 - Então, em cada terminal, abra o arquivo `~/.bashrc` para adicionar a variável de ambiente HADOOP_HOME e atualizar o PATH, coloque no final do arquivo:
 

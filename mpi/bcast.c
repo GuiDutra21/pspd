@@ -1,4 +1,4 @@
-Uso do Bcast
+// Uso do Bcast
 
 #define MASTER 0
 #include <stdio.h>
@@ -26,4 +26,3 @@ int main()
     MPI_Finalize();
     return 0;
 }
-
